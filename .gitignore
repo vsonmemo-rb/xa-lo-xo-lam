@@ -1,0 +1,16 @@
+# Rác của Windows
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Rác của macOS (phòng khi mở bằng máy khác)
+.DS_Store
+
+# File tạm khi dựng/kiểm tra web
+_preview.html
+_shot.html
+_diag.html
+_font.html
+*.tmp

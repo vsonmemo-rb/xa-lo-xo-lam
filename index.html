@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xà Lơ Xờ Lam — Ăn vặt xả đói, xờ lam xả sầu</title>
+<meta name="description" content="Slime handmade thơm mùi ăn vặt phố cổ: chè bưởi, cà phê muối, sữa chua trân châu, sữa dâu, xôi cốm. Nhìn thì ngon, bóp mới đã.">
+<link rel="icon" href="assets/img/logo.png">
+<meta property="og:title" content="Xà Lơ Xờ Lam — Ăn vặt xả đói, xờ lam xả sầu">
+<meta property="og:description" content="Slime handmade thơm mùi ăn vặt phố cổ. Bóp thôi, đừng ăn.">
+<meta property="og:image" content="assets/img/banner.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Be+Vietnam+Pro:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="top">
+  <a class="nav__logo" href="#top">
+    <img src="assets/img/logo.png" alt="Logo Xà Lơ Xờ Lam">
+    <span class="nav__logo-text">XÀ.LƠ XỜ LAM</span>
+  </a>
+  <nav class="nav__links">
+    <a href="#about">Về tụi tớ</a>
+    <a href="#menu">Menu</a>
+    <a href="#shop">Bóp thử</a>
+    <a href="#order">Đặt hàng</a>
+  </nav>
+  <button class="nav__sound" id="navSound" type="button" aria-pressed="true" title="Bật/tắt âm thanh">🔊</button>
+  <button class="nav__cart" id="navCart" type="button">
+    <span class="nav__cart-count" id="navCartCount">0</span>
+    <span class="nav__cart-total" id="navCartTotal">0đ</span>
+  </button>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <img class="hero__banner" src="assets/img/banner.png" alt="Xà Lơ Xờ Lam — ăn vặt xả đói, xờ lam xả sầu">
+  <div class="hero__body">
+    <p class="pill">ĂN VẶT XẢ ĐÓI &nbsp;•&nbsp; XỜ LAM XẢ SẦU</p>
+    <h1 class="hero__title display">Bóp thôi,<br>đừng ăn!</h1>
+    <p class="hero__sub">
+      Slime handmade thơm mùi ăn vặt phố cổ. Nhìn thì ngon, ngửi thì đói,
+      nhưng cắn một phát là hết bạn với tụi tớ đó nha.
+    </p>
+    <div class="hero__cta">
+      <a class="btn btn--blue" href="#shop">CHỌN HŨ CỦA CẬU ↓</a>
+      <a class="btn btn--ghost" href="#about">TỤI TỚ LÀ AI?</a>
+    </div>
+  </div>
+  <div class="hero__mascots" aria-hidden="true">
+    <div class="mascot mascot--xa float-a"></div>
+    <div class="mascot mascot--lo float-b"></div>
+  </div>
+</section>
+
+<!-- ============ BĂNG SẢN PHẨM TREO ============ -->
+<section class="strip">
+  <div class="strip__rail" id="strip"></div>
+  <p class="strip__note">5 vị · 100% handmade · từ “các nghệ nhân tại Standford phố Vọng”</p>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section class="about" id="about">
+  <p class="chip">XÀ LƠ STUDIO</p>
+  <h2 class="section-title display">Tụi tớ là ai?</h2>
+
+  <div class="about__lead">
+    <p class="about__lead-left">HÀNG THẬT<br>THƠM THẬT<br>CHỈ LÀ<br>KHÔNG ĂN ĐƯỢC</p>
+    <p class="about__lead-mid">
+      <b>Xà Lơ Xờ Lam</b> là slime handmade lấy cảm hứng từ những món ăn vặt quen mặt của phố xá Hà Nội —
+      chè bưởi, cà phê muối, sữa chua trân châu, sữa dâu, xôi cốm. Tụi tớ đi ăn, thấy ngon quá,
+      thế là tha về nắn thành hũ để bóp cho đã. Mùi vẫn thơm, nhìn vẫn ngon, nghịch cả tối chưa chán —
+      mà quan trọng nhất là <b>chẳng mất thêm đồng nào</b>.
+    </p>
+    <p class="about__lead-right">
+      GHẾ NHỰA ĐỎ<br>
+      VỈA HÈ<br>
+      TRÀ ĐÁ<br>
+      &amp; MỘT HŨ ĐỂ BÓP
+    </p>
+  </div>
+
+  <div class="story">
+    <article class="story__card story__card--xa">
+      <div class="story__pic"><div class="mascot mascot--xa"></div></div>
+      <div class="story__text">
+        <h3 class="display">Tớ là Xà</h3>
+        <p>Tớ thích lê la phố xá, thích ăn ngon, mặc đẹp. Cậu muốn đi cháy phố á, cứ để tớ. Món nào ngon, quán nào chuẩn tớ đều biết, không biết… tớ bịa :)))</p>
+        <p>Ăn xong tớ tha về, nắn thành hũ, bóp cho méo, kéo cho dài, thích thì lại vo tròn. Mùi vẫn thơm, nhìn vẫn ngon, nghịch cả tối chưa chán. Quan trọng nhất là tớ chẳng mất thêm đồng nào. Đỉnh không? Tớ biết tớ thông minh mà, không cần khen đâu.</p>
+        <p>Đi cạnh tớ còn có Lơ. Tớ nói gì nó cũng tin, bảo gì nó cũng nghe. Tớ thì không muốn nhận là mình khôn đâu… nhưng so với nó thì đúng là hơi bị sáng dạ.</p>
+      </div>
+    </article>
+
+    <article class="story__card story__card--lo">
+      <div class="story__pic"><div class="mascot mascot--lo"></div></div>
+      <div class="story__text">
+        <h3 class="display">Tớ là Lơ</h3>
+        <p>Tớ hay đi theo nhỏ Xà. Nó rủ đâu tớ đi đó, nói gì tớ cũng tin. Tại nó thông minh mà, ít nhất là nó tự nhận thế.</p>
+        <p>Hôm nọ nó đưa tớ một hũ chè, thơm điên đảo. Tớ hí hửng định ăn thì nó bảo: <b>“Bóp thôi, đừng ăn.”</b></p>
+        <p>Tớ nghe lời. Bóp một cái, bóp thêm cái nữa, rồi bóp mãi… Bóp vui thật. Xong chẳng hiểu kiểu gì tớ quên luôn cả deadline.</p>
+        <p>Chắc Xà lại đúng… hoặc tớ bị nó lừa rồi?</p>
+      </div>
+    </article>
+  </div>
+
+  <p class="about__punch display">Mà này... cậu bóp thử chưa?</p>
+</section>
+
+<!-- ============ MENU (danh sách vị) ============ -->
+<section class="menu" id="menu">
+  <div class="menu__head">
+    <p class="chip">MENU HÔM NAY</p>
+    <a class="menu__all" href="#shop">XEM TẤT CẢ →</a>
+  </div>
+  <ul class="menu__list" id="menuList"></ul>
+  <div class="menu__peek" id="menuPeek" aria-hidden="true"><img src="assets/img/sp-che-buoi.jpg" alt=""></div>
+</section>
+
+<!-- ============ SHOP ============ -->
+<section class="shop" id="shop">
+  <div class="shop__head">
+    <p class="chip">BÓP THỬ ĐI</p>
+    <h2 class="section-title display">Chọn hũ của cậu</h2>
+    <p class="shop__hint">Bấm vào ảnh để bóp thử một cái xem sao 👀</p>
+  </div>
+  <div class="grid" id="grid"></div>
+</section>
+
+<!-- ============ ĐẶT HÀNG ============ -->
+<section class="order" id="order">
+  <div class="order__inner">
+    <p class="chip chip--light">CHỐT ĐƠN</p>
+    <h2 class="section-title section-title--light display">Điền cái này là xong</h2>
+
+    <div class="order__cols">
+      <!-- Giỏ hàng -->
+      <div class="cart">
+        <h3 class="cart__title">Giỏ của cậu</h3>
+        <ul class="cart__list" id="cartList">
+          <li class="cart__empty">Chưa có gì trong giỏ. Kéo lên trên chọn vài hũ đi cậu ơi 🫠</li>
+        </ul>
+        <dl class="cart__sum">
+          <div><dt>Tiền hàng</dt><dd id="sumGoods">0đ</dd></div>
+          <div><dt>Phí ship</dt><dd id="sumShip">—</dd></div>
+          <div class="cart__sum-total"><dt>TỔNG CỘNG</dt><dd id="sumTotal">0đ</dd></div>
+        </dl>
+      </div>
+
+      <!-- Form -->
+      <form class="form" id="orderForm" novalidate>
+        <div class="field">
+          <label for="fName">Họ và tên <span>*</span></label>
+          <input id="fName" name="name" type="text" autocomplete="name" placeholder="Nguyễn Văn Xà">
+          <small class="err" data-err="name"></small>
+        </div>
+
+        <div class="field">
+          <label for="fPhone">Số điện thoại <span>*</span></label>
+          <input id="fPhone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="0912345678">
+          <small class="err" data-err="phone"></small>
+        </div>
+
+        <div class="field">
+          <label for="fEmail">Email <span>*</span></label>
+          <input id="fEmail" name="email" type="email" autocomplete="email" placeholder="xalo@gmail.com">
+          <small class="err" data-err="email"></small>
+        </div>
+
+        <fieldset class="field">
+          <legend>Hình thức nhận hàng <span>*</span></legend>
+          <div class="ships" id="ships"></div>
+          <small class="err" data-err="ship"></small>
+        </fieldset>
+
+        <div class="field" id="addrField" hidden>
+          <label for="fAddr">Địa chỉ nhận hàng <span>*</span></label>
+          <input id="fAddr" name="address" type="text" autocomplete="street-address" placeholder="Số nhà, ngõ, phường/xã, quận/huyện, tỉnh/TP">
+          <small class="err" data-err="address"></small>
+        </div>
+
+        <div class="field">
+          <label for="fNote">Lời nhắn cho Xà &amp; Lơ</label>
+          <textarea id="fNote" name="note" rows="3" placeholder="Ví dụ: gói kỹ giúp mình nha, giao giờ hành chính…"></textarea>
+        </div>
+
+        <button class="btn btn--yellow btn--big" type="submit" id="submitBtn">CHỐT ĐƠN LUÔN →</button>
+        <p class="form__msg" id="formMsg" role="status"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer__brand">
+    <img src="assets/img/logo.png" alt="Xà Lơ Xờ Lam">
+    <p class="footer__tag">ĂN VẶT XẢ ĐÓI — XỜ LAM XẢ SẦU</p>
+  </div>
+  <div class="footer__cols">
+    <div>
+      <h4>Hotline</h4>
+      <p>Ms. Thuỳ Dương<br><a class="footer__phone" href="tel:0386252005">0386 252 005</a></p>
+      <p>Ms. Khánh Huyền<br><a class="footer__phone" href="tel:0837196829">0837 196 829</a></p>
+    </div>
+    <div>
+      <h4>Theo dõi tụi tớ</h4>
+      <p><a href="https://www.facebook.com/xaloxolamneu" target="_blank" rel="noopener">Fanpage: facebook.com/xaloxolamneu</a></p>
+      <p>Nhận hàng trực tiếp: phố Vọng, Hai Bà Trưng, Hà Nội</p>
+    </div>
+    <div>
+      <h4>Lưu ý nhỏ</h4>
+      <p>Sản phẩm là <b>đồ chơi slime</b>, không phải thực phẩm. Không ăn, không nuốt.</p>
+      <p>Tránh xa trẻ dưới 3 tuổi. Rửa tay sau khi chơi.</p>
+    </div>
+  </div>
+  <p class="footer__copy">© <span id="year"></span> Xà Lơ Xờ Lam. Made with ghế nhựa đỏ &amp; trà đá.</p>
+</footer>
+
+<!-- ============ THANH GIỎ HÀNG DÍNH ĐÁY ============ -->
+<div class="dock" id="dock" hidden>
+  <div class="dock__info">
+    <strong id="dockCount">0 hũ</strong>
+    <span id="dockTotal">0đ</span>
+  </div>
+  <a class="btn btn--blue" href="#order">ĐẶT HÀNG →</a>
+</div>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>
