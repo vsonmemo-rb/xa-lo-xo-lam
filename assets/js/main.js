@@ -200,7 +200,7 @@ document.addEventListener("click", e => {
 
 /* ---------- BĂNG SẢN PHẨM TREO ---------- */
 $("#strip").innerHTML = PRODUCTS.map(p => `
-  <a class="strip__item" href="#shop">
+  <a class="strip__item" href="#card-${p.id}" data-goto="${p.id}">
     <img src="${p.img}" alt="Slime ${p.name}" loading="lazy">
     <span>${p.name.toUpperCase()}</span>
   </a>`).join("");
@@ -208,7 +208,7 @@ $("#strip").innerHTML = PRODUCTS.map(p => `
 /* ---------- DANH SÁCH MENU ---------- */
 $("#menuList").innerHTML = PRODUCTS.map((p, i) => `
   <li class="menu__row">
-    <a class="menu__link" href="#shop" data-img="${p.img}">
+    <a class="menu__link" href="#card-${p.id}" data-img="${p.img}" data-goto="${p.id}">
       ${p.name.toUpperCase()} <em>(${String(i + 1).padStart(2, "0")})</em>
       <b>${p.stock ? money(p.price) : "TẠM HẾT"}</b>
     </a>
@@ -256,6 +256,17 @@ $$("[data-squish]").forEach(el => {
     void el.offsetWidth;                       // ép trình duyệt chạy lại animation
     el.classList.add("squish");
   });
+});
+
+/* bấm tên món ở Menu / băng ảnh trên đầu -> nhảy đúng tới hũ đó và nháy sáng cho dễ thấy */
+document.addEventListener("click", e => {
+  const link = e.target.closest("[data-goto]");
+  if (!link) return;
+  const card = document.getElementById("card-" + link.dataset.goto);
+  if (!card) return;
+  card.classList.remove("is-target");
+  void card.offsetWidth;                       // ép chạy lại hiệu ứng nháy
+  card.classList.add("is-target");
 });
 
 /* nút +/- */
