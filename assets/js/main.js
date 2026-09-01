@@ -87,17 +87,13 @@ const money = n => n.toLocaleString("vi-VN") + "đ";
 const cart = new Map();          // id -> số lượng
 let shipId = null;
 
-/* ---------- khôi phục giỏ hàng cũ ---------- */
-try {
-  const saved = JSON.parse(localStorage.getItem("xlxl-cart") || "[]");
-  saved.forEach(([id, q]) => {
-    if (PRODUCTS.some(p => p.id === id && p.stock) && q > 0) cart.set(id, q);
-  });
-} catch (e) { /* không sao, bỏ qua */ }
+/* ---------- giỏ hàng KHÔNG được nhớ giữa các lần vào web ----------
+   Khách thoát ra vào lại là giỏ trống. Cố tình làm vậy để không ai
+   thấy đơn cũ còn treo rồi đặt nhầm.
+   Dòng removeItem để dọn dữ liệu cũ của những máy đã lỡ lưu từ trước. */
+try { localStorage.removeItem("xlxl-cart"); } catch (e) {}
 
-function saveCart() {
-  try { localStorage.setItem("xlxl-cart", JSON.stringify([...cart])); } catch (e) {}
-}
+function saveCart() { /* cố tình không lưu gì cả */ }
 
 /* ============================================================
    ÂM THANH KHI BẤM NÚT
@@ -489,4 +485,20 @@ Ghi chú: ${d.note || "—"}`;
 
 /* ---------- LẶT VẶT ---------- */
 $("#year").textContent = new Date().getFullYear();
+
+/* Trình duyệt hay tự điền lại những gì khách gõ dở khi bấm F5.
+   Dọn sạch để trạng thái form luôn khớp với giỏ hàng đang trống. */
+(function resetForm() {
+  const f = $("#orderForm");
+  if (f && f.reset) f.reset();
+  shipId = null;
+  $$(".ship").forEach(l => l.classList.remove("is-on"));
+  $("#addrField").hidden = true;
+  ["name", "phone", "email", "address"].forEach(clearErr);
+})();
+
+/* Khách bấm nút Back quay lại: trình duyệt trả về trang cũ y nguyên
+   (bfcache) nên phải nạp lại cho sạch. */
+window.addEventListener("pageshow", e => { if (e.persisted) location.reload(); });
+
 render();
