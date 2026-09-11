@@ -1,10 +1,11 @@
 /* ============================================================
    XÀ LƠ XỜ LAM — main.js
    ============================================================
-   ▼▼▼ 3 CHỖ CẦN SỬA, NẰM NGAY DƯỚI ĐÂY ▼▼▼
+   ▼▼▼ 4 CHỖ CẦN SỬA, NẰM NGAY DƯỚI ĐÂY ▼▼▼
    1. SHEET_API   — dán link Apps Script (.../exec) vào
-   2. PRODUCTS    — sửa giá + size từng hũ
-   3. SHIPPING    — sửa hình thức nhận hàng + phí ship
+   2. SIZES       — sửa GIÁ + dung tích (dùng chung cho mọi hũ)
+   3. PRODUCTS    — sửa tên, mô tả, còn/hết hàng từng vị
+   4. SHIPPING    — sửa hình thức nhận hàng + phí ship
    Sửa xong bấm Ctrl+S rồi F5 lại trang là ăn ngay.
    ============================================================ */
 
@@ -13,14 +14,19 @@
 // (khách sẽ được đưa nội dung đơn để copy gửi qua Facebook/Zalo).
 const SHEET_API = "https://script.google.com/macros/s/AKfycbxH_B3qTC95cl0M6O3OswUuc7eyXVCGQ11cyVBOtDccdl3Fo-4d34vvfbQEgbCnaTu5/exec";
 
-/* ---------- 2. SẢN PHẨM ---------- */
-// ⚠️ GIÁ HIỆN TẠI LÀ GIÁ TẠM — nhớ sửa lại cho đúng!
+/* ---------- 2. SIZE & GIÁ — dùng chung cho TẤT CẢ các vị ---------- */
+// Giá viết liền, không dấu chấm: 55000 (đúng) — 55.000 (sai)
+// ⛔ Đừng đổi chữ trong id ("full", "mini")
+const SIZES = [
+  { id: "full", label: "Full size", volume: "450ml", price: 55000 },
+  { id: "mini", label: "Mini size", volume: "120ml", price: 35000 }
+];
+
+/* ---------- 3. SẢN PHẨM ---------- */
 const PRODUCTS = [
   {
     id: "che-buoi",
     name: "Chè bưởi",
-    size: "Hũ size L",
-    price: 55000,                       // ⚠️ sửa giá
     img: "assets/img/sp-che-buoi.jpg",
     tag: "GIÒN RÀO RÀO",
     desc: "Clear slime vàng cam trong veo, lấm tấm hạt bưởi giòn tan. Bóp một cái nghe rào rào y như đang khuấy cốc chè đá.",
@@ -29,8 +35,6 @@ const PRODUCTS = [
   {
     id: "ca-phe-muoi",
     name: "Cà phê muối",
-    size: "Hũ size L",
-    price: 55000,                       // ⚠️ sửa giá
     img: "assets/img/sp-ca-phe-muoi.jpg",
     tag: "MƯỢT NHƯ FOAM",
     desc: "Butter slime nâu kem, mặn mòi vibe cà phê vỉa hè. Kéo mượt như lớp foam muối, thơm đến mức suýt uống nhầm.",
@@ -39,8 +43,6 @@ const PRODUCTS = [
   {
     id: "sua-chua-tran-chau",
     name: "Sữa chua trân châu",
-    size: "Hũ size L",
-    price: 60000,                       // ⚠️ sửa giá
     img: "assets/img/sp-sua-chua-tran-chau.jpg",
     tag: "LỘP BỘP",
     desc: "Cloud creamy trắng ngần, trân châu bi lăn lộp bộp bên trong. Bóp bụp bụp, kéo ra dẻo, vo lại tròn xoe.",
@@ -49,8 +51,6 @@ const PRODUCTS = [
   {
     id: "sua-dau",
     name: "Sữa dâu",
-    size: "Hũ size L",
-    price: 55000,                       // ⚠️ sửa giá
     img: "assets/img/sp-sua-dau.jpg",
     tag: "CHỮA LÀNH",
     desc: "Hồng phấn thơm dâu, mềm mịn như ly sữa dâu đá xay. Loại này bóp xong là hết cáu, thật đấy.",
@@ -59,8 +59,6 @@ const PRODUCTS = [
   {
     id: "xoi-com",
     name: "Xôi cốm",
-    size: "Hũ size L",
-    price: 60000,                       // ⚠️ sửa giá
     img: "assets/img/sp-xoi-com.jpg",
     tag: "DẺO QUÁNH",
     desc: "Xanh cốm non, lợn cợn hạt cốm dẻo, thoang thoảng mùi lá sen. Mùa thu Hà Nội đóng gọn trong một hũ.",
@@ -68,7 +66,7 @@ const PRODUCTS = [
   }
 ];
 
-/* ---------- 3. HÌNH THỨC NHẬN HÀNG ---------- */
+/* ---------- 4. HÌNH THỨC NHẬN HÀNG ---------- */
 // ⚠️ SỬA LẠI CHO ĐÚNG khu vực & phí ship của shop
 const SHIPPING = [
   { id: "tainoi", label: "Nhận trực tiếp tại phố Vọng", fee: 0,     needAddress: false },
@@ -84,8 +82,12 @@ const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const money = n => n.toLocaleString("vi-VN") + "đ";
 
-const cart = new Map();          // id -> số lượng
+const cart = new Map();          // "idVị:idSize" -> số lượng, vd "che-buoi:mini" -> 2
 let shipId = null;
+
+const keyOf    = (pid, sid) => pid + ":" + sid;
+const minPrice = Math.min(...SIZES.map(s => s.price));
+const selSize  = new Map(PRODUCTS.map(p => [p.id, SIZES[0].id]));   // size đang chọn trên từng thẻ
 
 /* ---------- giỏ hàng KHÔNG được nhớ giữa các lần vào web ----------
    Khách thoát ra vào lại là giỏ trống. Cố tình làm vậy để không ai
@@ -194,7 +196,7 @@ document.addEventListener("click", e => {
   if (e.target.closest("[data-squish]"))              return Sfx.squish();
   if (e.target.closest("[data-plus]"))                return Sfx.plus();
   if (e.target.closest("[data-minus], [data-del]"))   return Sfx.minus();
-  if (e.target.closest(".nav__links a, .menu__link, .strip__item, .menu__all")) return Sfx.tick();
+  if (e.target.closest(".nav__links a, .menu__link, .strip__item, .menu__all, [data-pick]")) return Sfx.tick();
   if (e.target.closest("button, .btn, .ship, .qty__btn"))    return Sfx.pop();
 });
 
@@ -210,7 +212,7 @@ $("#menuList").innerHTML = PRODUCTS.map((p, i) => `
   <li class="menu__row">
     <a class="menu__link" href="#card-${p.id}" data-img="${p.img}" data-goto="${p.id}">
       ${p.name.toUpperCase()} <em>(${String(i + 1).padStart(2, "0")})</em>
-      <b>${p.stock ? money(p.price) : "TẠM HẾT"}</b>
+      <b>${p.stock ? "từ " + money(minPrice) : "TẠM HẾT"}</b>
     </a>
   </li>`).join("");
 
@@ -236,16 +238,25 @@ $("#grid").innerHTML = PRODUCTS.map(p => `
     </div>
     <div class="card__body">
       <h3 class="card__name">${p.name}</h3>
-      <p class="card__meta">${p.tag} · ${p.size}</p>
+      <p class="card__meta">${p.tag}</p>
       <p class="card__desc">${p.desc}</p>
-      <p class="card__price">${p.stock ? money(p.price) : "Tạm hết hàng"} <small>${p.stock ? "/ hũ" : ""}</small></p>
       ${p.stock ? `
-      <div class="qty">
-        <button class="qty__btn" type="button" data-minus="${p.id}" aria-label="Bớt 1 hũ ${p.name}">−</button>
-        <span class="qty__val" data-val="${p.id}">0</span>
-        <button class="qty__btn" type="button" data-plus="${p.id}" aria-label="Thêm 1 hũ ${p.name}">+</button>
+      <div class="seg" role="radiogroup" aria-label="Chọn size ${p.name}">
+        ${SIZES.map(s => `
+        <button class="seg__opt" type="button" role="radio" data-pick="${p.id}" data-sid="${s.id}">
+          ${s.label}<small>${s.volume}</small>
+          <i class="seg__badge" data-badge="${keyOf(p.id, s.id)}" hidden></i>
+        </button>`).join("")}
       </div>
-      <p class="qty__sub" data-sub="${p.id}"></p>` : ""}
+      <div class="buy">
+        <p class="buy__price" data-price="${p.id}"></p>
+        <div class="qty">
+          <button class="qty__btn" type="button" data-minus="${p.id}" aria-label="Bớt 1 hũ ${p.name}">−</button>
+          <span class="qty__val" data-val="${p.id}">0</span>
+          <button class="qty__btn" type="button" data-plus="${p.id}" aria-label="Thêm 1 hũ ${p.name}">+</button>
+        </div>
+      </div>
+      <p class="qty__sub" data-sub="${p.id}"></p>` : `<p class="card__soldout">Tạm hết hàng</p>`}
     </div>
   </article>`).join("");
 
@@ -269,12 +280,16 @@ document.addEventListener("click", e => {
   card.classList.add("is-target");
 });
 
-/* nút +/- */
+/* chọn size + nút +/- (cộng/trừ vào đúng size đang chọn trên thẻ đó) */
 $("#grid").addEventListener("click", e => {
-  const plus  = e.target.closest("[data-plus]");
-  const minus = e.target.closest("[data-minus]");
-  if (plus)  setQty(plus.dataset.plus,  (cart.get(plus.dataset.plus)  || 0) + 1);
-  if (minus) setQty(minus.dataset.minus, (cart.get(minus.dataset.minus) || 0) - 1);
+  const pick = e.target.closest("[data-pick]");
+  if (pick) { selSize.set(pick.dataset.pick, pick.dataset.sid); render(); return; }
+
+  const btn = e.target.closest("[data-plus], [data-minus]");
+  if (!btn) return;
+  const pid = btn.dataset.plus || btn.dataset.minus;
+  const k   = keyOf(pid, selSize.get(pid));
+  setQty(k, (cart.get(k) || 0) + (btn.dataset.plus ? 1 : -1));
 });
 
 function setQty(id, q) {
@@ -303,9 +318,15 @@ $("#ships").addEventListener("change", e => {
 
 /* ---------- RENDER ---------- */
 function lines() {
-  return [...cart].map(([id, q]) => {
-    const p = PRODUCTS.find(x => x.id === id);
-    return { ...p, qty: q, sum: p.price * q };
+  return [...cart].map(([key, q]) => {
+    const [pid, sid] = key.split(":");
+    const p = PRODUCTS.find(x => x.id === pid);
+    const s = SIZES.find(x => x.id === sid);
+    return {
+      key, name: p.name, img: p.img,
+      sizeLabel: `${s.label} ${s.volume}`,
+      price: s.price, qty: q, sum: s.price * q
+    };
   });
 }
 function goodsTotal() { return lines().reduce((t, l) => t + l.sum, 0); }
@@ -316,13 +337,28 @@ function itemCount()  { return [...cart.values()].reduce((t, q) => t + q, 0); }
 function render() {
   // lưới
   PRODUCTS.forEach(p => {
-    const q = cart.get(p.id) || 0;
+    const sel = SIZES.find(s => s.id === selSize.get(p.id));
+    let qtyAll = 0, sumAll = 0;
+    SIZES.forEach(s => {
+      const q = cart.get(keyOf(p.id, s.id)) || 0;
+      qtyAll += q;
+      sumAll += q * s.price;
+      const badge = $(`[data-badge="${keyOf(p.id, s.id)}"]`);
+      if (badge) { badge.textContent = q; badge.hidden = q === 0; }
+    });
+    $$(`[data-pick="${p.id}"]`).forEach(b => {
+      const on = b.dataset.sid === sel.id;
+      b.classList.toggle("is-on", on);
+      b.setAttribute("aria-checked", String(on));
+    });
+    const price = $(`[data-price="${p.id}"]`);
+    if (price) price.textContent = money(sel.price);
     const val = $(`[data-val="${p.id}"]`);
-    if (val) val.textContent = q;
+    if (val) val.textContent = cart.get(keyOf(p.id, sel.id)) || 0;
     const sub = $(`[data-sub="${p.id}"]`);
-    if (sub) sub.textContent = q ? `${q} hũ = ${money(p.price * q)}` : "";
+    if (sub) sub.textContent = qtyAll ? `${qtyAll} hũ = ${money(sumAll)}` : "";
     const card = $(`#card-${p.id}`);
-    if (card) card.classList.toggle("is-in", q > 0);
+    if (card) card.classList.toggle("is-in", qtyAll > 0);
   });
 
   // giỏ hàng
@@ -331,9 +367,9 @@ function render() {
     ? ls.map(l => `
       <li class="cart__row">
         <img src="${l.img}" alt="">
-        <span class="cart__row-name">${l.name}<span>${l.qty} × ${money(l.price)}</span></span>
+        <span class="cart__row-name">${l.name}<span>${l.sizeLabel} · ${l.qty} × ${money(l.price)}</span></span>
         <span class="cart__row-price">${money(l.sum)}</span>
-        <button class="cart__row-del" type="button" data-del="${l.id}" aria-label="Xoá ${l.name}">✕</button>
+        <button class="cart__row-del" type="button" data-del="${l.key}" aria-label="Xoá ${l.name} ${l.sizeLabel}">✕</button>
       </li>`).join("")
     : `<li class="cart__empty">Chưa có gì trong giỏ. Kéo lên trên chọn vài hũ đi cậu ơi 🫠</li>`;
 
@@ -406,7 +442,7 @@ function validate() {
     shipFee: ship.fee,
     address: ship.needAddress ? addr : "(nhận trực tiếp)",
     note: $("#fNote").value.trim(),
-    items: lines().map(l => `${l.name} x${l.qty}`).join(", "),
+    items: lines().map(l => `${l.name} (${l.sizeLabel}) x${l.qty}`).join(", "),
     itemCount: itemCount(),
     goods: goodsTotal(),
     total: grandTotal()

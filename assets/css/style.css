@@ -297,12 +297,46 @@ a{ color:inherit; }
   25%{ opacity:1; transform:translateX(-50%) scale(1.1) rotate(4deg); }
   100%{ opacity:0; transform:translateX(-50%) scale(1) translateY(-40px); }
 }
-.card__body{ display:flex; flex-direction:column; flex:1; padding:1.1rem 1.2rem 1.3rem; }
+.card__body{ display:flex; flex-direction:column; flex:1; padding:1.1rem 1rem 1.3rem; }
 .card__name{ font-family:var(--display); font-size:1.6rem; margin:0 0 .1em; color:var(--blue); }
 .card__meta{ font-size:.72rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; opacity:.6; margin:0 0 .6rem; }
 .card__desc{ font-size:.9rem; margin:0 0 1rem; flex:1; }
-.card__price{ font-size:1.35rem; font-weight:900; color:var(--red); margin:0 0 .9rem; }
-.card__price small{ font-size:.7rem; font-weight:700; color:var(--ink); opacity:.6; letter-spacing:.06em; }
+.card__soldout{ font-weight:900; color:var(--red); margin:0; }
+
+/* thanh gạt chọn size Full / Mini */
+.seg{
+  display:grid; grid-template-columns:repeat(2, 1fr);
+  margin:.4rem 0 .85rem;                 /* chừa chỗ cho chấm đỏ nhô lên trên */
+  border:2px solid var(--ink); border-radius:12px;
+}
+.seg__opt:first-child{ border-radius:10px 0 0 10px; }
+.seg__opt:last-child{ border-radius:0 10px 10px 0; }
+.seg__opt{
+  position:relative; display:flex; flex-direction:column; align-items:center;
+  padding:.45rem .3rem; cursor:pointer;
+  font-family:var(--body); font-size:.8rem; font-weight:800; line-height:1.25; color:var(--ink);
+  background:#fff; border:none;
+  transition:background .12s ease, color .12s ease;
+}
+.seg__opt + .seg__opt{ border-left:2px solid var(--ink); }
+.seg__opt small{ font-size:.7rem; font-weight:600; opacity:.6; }
+.seg__opt:hover{ background:var(--cream); }
+.seg__opt.is-on{ background:var(--blue); color:#fff; }
+.seg__opt.is-on small{ opacity:.85; }
+/* chấm đỏ: size này đã có bao nhiêu hũ trong giỏ */
+.seg__badge{
+  position:absolute; top:-9px; right:6px; z-index:1;   /* nhô lên mép trên như thông báo */
+  display:grid; place-items:center; min-width:1.5em; height:1.5em; padding:0 .3em;
+  font-style:normal; font-size:.66rem; font-weight:900; color:#fff;
+  background:var(--red); border:2px solid var(--paper); border-radius:999px;
+}
+
+/* giá của size đang chọn + bộ +/− trên cùng một hàng */
+.buy{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.4rem; }
+.buy__price{ margin:0; font-size:1.15rem; font-weight:900; color:var(--red); }
+.buy .qty{ gap:.3rem; }
+.buy .qty__btn{ width:30px; height:30px; font-size:1.05rem; border-width:2px; }
+.buy .qty__val{ flex:none; width:1.9em; padding:.15em 0; font-size:.95rem; border-width:2px; }
 
 .qty{ display:flex; align-items:center; gap:.6rem; }
 .qty__btn{

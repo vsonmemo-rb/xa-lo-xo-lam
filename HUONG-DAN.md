@@ -28,15 +28,33 @@ Mở web: bấm đúp vào **`index.html`**.
 
 ## 2. Sửa giá, size, hình thức ship
 
-Mở **`assets\js\main.js`** bằng Notepad (hoặc VS Code). Ba khối cần sửa nằm ngay đầu file:
+Mở **`assets\js\main.js`** bằng Notepad (hoặc VS Code). Các khối cần sửa nằm ngay đầu file:
 
-**a) Giá sản phẩm** — trong `PRODUCTS`, sửa số ở dòng `price:` (viết liền, không dấu chấm):
+**a) Giá theo size** — trong khối `SIZES`, **dùng chung cho cả 5 vị**. Sửa 1 chỗ là cả 5 thẻ,
+Menu, giỏ hàng và đơn gửi Sheet đổi theo:
 
 ```js
-{ id: "che-buoi", name: "Chè bưởi", size: "Hũ size L",
-  price: 55000,        // ⚠️ sửa giá ở đây
+const SIZES = [
+  { id: "full", label: "Full size", volume: "450ml", price: 55000 },
+  { id: "mini", label: "Mini size", volume: "120ml", price: 35000 }
+];
+```
+- `price`: viết liền, không dấu chấm (`55000`, không phải `55.000`)
+- `label`, `volume`: chữ hiện trên web, sửa thoải mái
+- ⛔ **Đừng đổi `id`** (`"full"`, `"mini"`) — dùng để phân biệt 2 size trong giỏ hàng
+- Menu tự hiện "từ 35.000đ" theo size rẻ nhất
+
+Mỗi thẻ sản phẩm có **thanh gạt Full / Mini**: khách bấm chọn size, giá và nút +/− đổi theo size
+đang chọn. Khách vẫn mua lẫn được (vd 2 hũ Full + 1 hũ Mini cùng một vị) — size nào đã có hũ trong
+giỏ thì hiện chấm đỏ ghi số lượng trên thanh gạt. Trong giỏ và trong Google Sheet, mỗi size là một
+dòng riêng, kiểu `Chè bưởi (Full size 450ml) x2, Chè bưởi (Mini size 120ml) x1`.
+
+**Tên, mô tả, còn/hết hàng** — trong khối `PRODUCTS`:
+
+```js
+{ id: "che-buoi", name: "Chè bưởi",
   ...
-  stock: true          // đổi thành false nếu hết hàng
+  stock: true          // đổi thành false nếu hết hàng (hết cả 2 size)
 }
 ```
 
@@ -49,7 +67,7 @@ Mở **`assets\js\main.js`** bằng Notepad (hoặc VS Code). Ba khối cần s�
 - `needAddress: true` → khách chọn cái này thì ô "Địa chỉ" mới hiện ra và bắt buộc điền.
 - Thêm/bớt dòng thoải mái, nhớ dấu phẩy cuối mỗi dòng (trừ dòng cuối cùng).
 
-**c) Link Google Sheet** — dòng `const SHEET_API = "";` (xem mục 3).
+**c) Link Google Sheet** — dòng `const SHEET_API = "...";` (xem mục 3).
 
 Sửa xong bấm **Ctrl+S**, quay lại trình duyệt bấm **Ctrl+F5**.
 
