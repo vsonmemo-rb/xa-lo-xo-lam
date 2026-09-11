@@ -462,36 +462,32 @@ function msg(text, cls = "") {
   el.className = "form__msg " + cls;
 }
 
-/* ---------- GỬI ĐƠN ---------- */
-$("#orderForm").addEventListener("submit", async e => {
+/* ---------- GỬI ĐƠN ----------
+   Gửi NGẦM rồi báo thành công ngay, không đứng chờ Google Sheet.
+   Lý do: Apps Script lâu không ai gọi thì lần đầu khởi động rất chậm
+   (đo thực tế: 39 giây, các lần sau ~1 giây). Chờ cũng vô ích vì
+   Apps Script không cho web đọc kết quả trả về.
+   Request giữ y hệt kiểu cũ đã test chạy tốt, chỉ bỏ đoạn đứng chờ. */
+function sendOrder(data) {
+  fetch(SHEET_API, {
+    method: "POST",
+    mode: "no-cors",                           // Apps Script không trả CORS header
+    keepalive: true,                           // khách đóng tab thì trình duyệt vẫn gửi cho xong
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(data)
+  }).catch(() => {});
+}
+
+$("#orderForm").addEventListener("submit", e => {
   e.preventDefault();
   const data = validate();
   if (!data) { Sfx.err(); return; }
 
-  const btn = $("#submitBtn");
-  btn.disabled = true;
-  msg("Đang gửi đơn cho Xà & Lơ…");
-
-  let sent = false;
-  if (SHEET_API) {
-    try {
-      await fetch(SHEET_API, {
-        method: "POST",
-        mode: "no-cors",                       // Apps Script không trả CORS header
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(data)
-      });
-      sent = true;
-    } catch (err) {
-      sent = false;
-    }
-  }
-
-  if (sent) {
+  if (SHEET_API && navigator.onLine) {
+    sendOrder(data);                           // không await -> không bắt khách chờ
     success(data);
   } else {
-    btn.disabled = false;
-    fallback(data);
+    fallback(data);                            // mất mạng -> đưa khách nội dung đơn để nhắn shop
   }
 });
 
