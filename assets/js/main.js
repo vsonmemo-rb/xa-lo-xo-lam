@@ -29,7 +29,7 @@ const PRODUCTS = [
     name: "Chè bưởi",
     img: "assets/img/sp-che-buoi.jpg",
     tag: "GIÒN RÀO RÀO",
-    desc: "Clear slime vàng cam trong veo, lấm tấm hạt bưởi giòn tan. Bóp một cái nghe rào rào y như đang khuấy cốc chè đá.",
+    desc: "Hũ slime vàng trong, bên trong có mút xốp và hạt topping vàng nhỏ mô phỏng cùi bưởi và đỗ xanh. Tone vàng kem - trắng - vàng nhạt, tạo cảm giác trong trẻo, ngọt ngào và giống một chén chè bưởi thu nhỏ.",
     stock: true                          // để false nếu hết hàng
   },
   {
@@ -37,7 +37,7 @@ const PRODUCTS = [
     name: "Cà phê muối",
     img: "assets/img/sp-ca-phe-muoi.jpg",
     tag: "MƯỢT NHƯ FOAM",
-    desc: "Butter slime nâu kem, mặn mòi vibe cà phê vỉa hè. Kéo mượt như lớp foam muối, thơm đến mức suýt uống nhầm.",
+    desc: "Hũ slime màu nâu cà phê, phía trên là lớp trắng kem bông xốp, điểm kim tuyến đỏ và charm ngôi sao. Tổng thể gợi liên tưởng đến một ly cà phê muối, tone nâu - kem - đỏ, cảm giác ấm áp và cozy.",
     stock: true
   },
   {
@@ -45,7 +45,7 @@ const PRODUCTS = [
     name: "Sữa chua trân châu",
     img: "assets/img/sp-sua-chua-tran-chau.jpg",
     tag: "LỘP BỘP",
-    desc: "Cloud creamy trắng ngần, trân châu bi lăn lộp bộp bên trong. Bóp bụp bụp, kéo ra dẻo, vo lại tròn xoe.",
+    desc: "Hũ slime trắng sữa kết hợp phần nâu trong và các hạt trân châu đen nổi bật. Bố cục mô phỏng một cốc sữa chua trân châu, tone trắng - nâu - đen, hình ảnh bắt mắt và dễ liên tưởng đến món ăn thật.",
     stock: true
   },
   {
@@ -53,7 +53,7 @@ const PRODUCTS = [
     name: "Sữa dâu",
     img: "assets/img/sp-sua-dau.jpg",
     tag: "CHỮA LÀNH",
-    desc: "Hồng phấn thơm dâu, mềm mịn như ly sữa dâu đá xay. Loại này bóp xong là hết cáu, thật đấy.",
+    desc: "Sắc hồng pastel dịu ngọt, mô phỏng hoàn hảo màu của một ly sữa dâu tươi thực thụ. Màu sắc mang lại cảm giác dễ thương, nịnh mắt và xoa dịu thị giác ngay từ cái nhìn đầu tiên.",
     stock: true
   },
   {
@@ -61,7 +61,7 @@ const PRODUCTS = [
     name: "Xôi cốm",
     img: "assets/img/sp-xoi-com.jpg",
     tag: "DẺO QUÁNH",
-    desc: "Xanh cốm non, lợn cợn hạt cốm dẻo, thoang thoảng mùi lá sen. Mùa thu Hà Nội đóng gọn trong một hũ.",
+    desc: "Hũ slime lấy cảm hứng từ món xôi cốm truyền thống, với lớp slime xanh cốm mềm dẻo kết hợp topping mô phỏng hạt cốm. Tổng thể mang tone xanh cốm, tạo cảm giác mộc mạc, thơm ngon và gợi nhớ hương vị mùa thu Hà Nội.",
     stock: true
   }
 ];
