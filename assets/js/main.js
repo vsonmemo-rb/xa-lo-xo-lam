@@ -18,8 +18,8 @@ const SHEET_API = "https://script.google.com/macros/s/AKfycbxH_B3qTC95cl0M6O3Osw
 // Giá viết liền, không dấu chấm: 55000 (đúng) — 55.000 (sai)
 // ⛔ Đừng đổi chữ trong id ("full", "mini")
 const SIZES = [
-  { id: "full", label: "Full size", volume: "450ml", price: 55000 },
-  { id: "mini", label: "Mini size", volume: "120ml", price: 35000 }
+  { id: "full", label: "Full size", volume: "250ml", price: 55000 },
+  { id: "mini", label: "Mini size", volume: "100ml", price: 35000 }
 ];
 
 /* ---------- 3. SẢN PHẨM ---------- */
