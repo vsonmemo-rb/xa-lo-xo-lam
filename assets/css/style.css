@@ -313,13 +313,26 @@ a{ color:inherit; }
 .seg__opt:last-child{ border-radius:0 10px 10px 0; }
 .seg__opt{
   position:relative; display:flex; flex-direction:column; align-items:center;
-  padding:.45rem .3rem; cursor:pointer;
+  padding:.45rem .3rem; cursor:pointer; text-align:center;
   font-family:var(--body); font-size:.8rem; font-weight:800; line-height:1.25; color:var(--ink);
   background:#fff; border:none;
   transition:background .12s ease, color .12s ease;
 }
 .seg__opt + .seg__opt{ border-left:2px solid var(--ink); }
+.seg__opt > span{ display:flex; flex-direction:column; align-items:center; }
 .seg__opt small{ font-size:.7rem; font-weight:600; opacity:.6; }
+.seg__price{ display:none; }                        /* 2 size thì giá hiện ở dòng dưới */
+
+/* món có từ 3 lựa chọn (combo): xếp dọc, kèm giá từng dòng cho dễ so */
+.seg--stack{ grid-template-columns:1fr; }
+.seg--stack .seg__opt{ flex-direction:row; align-items:center; gap:.5rem; padding:.5rem .7rem; text-align:left; }
+.seg--stack .seg__opt > span{ flex-direction:row; align-items:baseline; gap:.4rem; flex-wrap:wrap; }
+.seg--stack .seg__opt + .seg__opt{ border-left:none; border-top:2px solid var(--ink); }
+.seg--stack .seg__opt:first-child{ border-radius:10px 10px 0 0; }
+.seg--stack .seg__opt:last-child{ border-radius:0 0 10px 10px; }
+.seg--stack .seg__price{ display:block; margin-left:auto; font-size:.9rem; font-weight:900; color:var(--red); white-space:nowrap; }
+.seg--stack .seg__opt.is-on .seg__price{ color:var(--cream); }
+.seg--stack .seg__badge{ top:50%; right:-8px; transform:translateY(-50%); }
 .seg__opt:hover{ background:var(--cream); }
 .seg__opt.is-on{ background:var(--blue); color:#fff; }
 .seg__opt.is-on small{ opacity:.85; }
@@ -471,6 +484,123 @@ a{ color:inherit; }
   .about__lead-right{ text-align:left; }
   .menu__peek{ display:none; }
   body{ padding-bottom:80px; }
+}
+
+/* ============================================================
+   ĐỢT TRUNG THU
+   Bật/tắt bằng dòng `const TRUNG_THU` trong assets/js/main.js.
+   Mọi rule dưới đây đều nằm trong .tt hoặc chỉ áp cho thẻ Trung thu,
+   nên khi tắt cờ, web trở lại y hệt như cũ.
+   ============================================================ */
+:root{
+  --tt-night:  #16205c;
+  --tt-night2: #0a0f2e;
+  --tt-moon:   #ffe6a3;
+}
+
+/* câu slogan in nghiêng dưới tên món */
+.card__slogan{
+  margin:0 0 .5rem; font-size:.82rem; font-style:italic; line-height:1.45;
+  color:var(--blue); opacity:.85;
+}
+
+/* ghi chú trên thẻ combo */
+.card__note{
+  margin:0 0 .8rem; padding:.6rem .75rem;
+  font-size:.78rem; line-height:1.45; font-weight:600;
+  color:var(--tt-night); background:var(--cream);
+  border:2px solid var(--ink); border-radius:12px;
+}
+.card__note b{ font-weight:900; }
+
+/* nhắc nhở trong form đặt hàng khi giỏ có combo */
+.field__hint{
+  margin:0 0 .5rem; padding:.6rem .8rem;
+  font-size:.82rem; line-height:1.45; font-weight:600;
+  text-transform:none; letter-spacing:0;
+  color:var(--ink); background:var(--cream);
+  border:2px solid var(--ink); border-radius:12px;
+}
+.field__hint i{ font-style:italic; }
+
+/* huy hiệu góc ảnh */
+.card__badge{
+  position:absolute; top:.85rem; left:.85rem; z-index:2;
+  padding:.3em .7em; white-space:nowrap;
+  font-size:.66rem; font-weight:900; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--tt-moon); background:var(--tt-night);
+  border:2px solid var(--ink); border-radius:999px;
+  box-shadow:2px 2px 0 var(--ink);
+}
+.card--tt{ box-shadow:6px 6px 0 var(--tt-night); }
+.card--tt:hover{ box-shadow:9px 9px 0 var(--tt-night); }
+.card--tt .card__name{ color:var(--tt-night); }
+
+/* khu sản phẩm thành đêm trăng */
+.tt .shop{
+  background:
+    radial-gradient(2px 2px at 12% 18%, rgba(255,255,255,.75) 50%, transparent 51%),
+    radial-gradient(2px 2px at 78% 12%, rgba(255,255,255,.65) 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 34% 8%,  rgba(255,255,255,.55) 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 62% 26%, rgba(255,255,255,.5)  50%, transparent 51%),
+    radial-gradient(2px 2px at 90% 34%, rgba(255,255,255,.45) 50%, transparent 51%),
+    linear-gradient(180deg, var(--tt-night2) 0%, var(--tt-night) 60%, #1d2a6e 100%);
+  border-top:var(--line); border-bottom:var(--line);
+}
+.tt .shop .section-title{ color:var(--tt-moon); }
+.tt .shop .chip{ color:var(--tt-moon); border-color:var(--tt-moon); background:transparent; }
+.tt .shop__hint{ color:rgba(255,255,255,.75); }
+
+/* dải banner đầu khu sản phẩm */
+.ttbanner{
+  position:relative; overflow:hidden;
+  max-width:1240px; margin:0 auto 2.5rem;
+  padding:2rem 1.5rem 2.2rem; text-align:center;
+  background:linear-gradient(170deg, #1d2a6e, var(--tt-night2));
+  border:var(--line); border-radius:26px;
+  box-shadow:6px 6px 0 var(--ink);
+}
+.ttbanner__sky{ position:absolute; inset:0; pointer-events:none; }
+.ttbanner__moon{
+  position:absolute; top:-40px; right:-30px; width:150px; height:150px; border-radius:50%;
+  background:radial-gradient(circle at 38% 34%, #fffbe9, var(--tt-moon) 62%, #f2cd77);
+  box-shadow:0 0 60px 18px rgba(255,220,140,.35);
+}
+.ttlantern{ position:absolute; font-size:1.5rem; opacity:.9; }
+.ttlantern--1{ left:6%;  top:16%; animation:ttFloat 5s ease-in-out infinite; }
+.ttlantern--2{ left:22%; top:58%; font-size:1.1rem; animation:ttFloat 6.5s ease-in-out infinite .6s; }
+.ttlantern--3{ right:16%; bottom:14%; font-size:1.3rem; animation:ttFloat 5.8s ease-in-out infinite 1.2s; }
+@keyframes ttFloat{ 0%,100%{ transform:translateY(0) rotate(-4deg);} 50%{ transform:translateY(-14px) rotate(4deg);} }
+
+.ttbanner__kicker{
+  position:relative; margin:0 0 .5rem;
+  font-size:.7rem; font-weight:900; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--tt-moon); opacity:.9;
+}
+.ttbanner__title{
+  position:relative; margin:0 0 .6rem;
+  font-size:clamp(2rem, 5.5vw, 3.4rem); color:var(--tt-moon);
+  text-shadow:0 0 26px rgba(255,220,140,.4);
+}
+.ttbanner__sub{
+  position:relative; max-width:46ch; margin:0 auto 1.4rem;
+  font-size:.95rem; font-weight:500; color:rgba(255,255,255,.88);
+}
+.ttbanner .btn{ position:relative; }
+
+/* nhãn nhỏ ở danh sách Menu + vòng sáng ở băng ảnh đầu trang */
+.menu__tt{
+  font-family:var(--body); font-style:normal;
+  font-size:.62rem; font-weight:900; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--tt-moon); background:var(--tt-night);
+  padding:.3em .7em; border-radius:999px; white-space:nowrap;
+}
+.strip__item--tt img{ box-shadow:4px 4px 0 var(--tt-night); }
+
+@media (max-width:700px){
+  .ttbanner{ padding:1.6rem 1.1rem 1.8rem; }
+  .ttbanner__moon{ width:110px; height:110px; top:-30px; right:-20px; }
+  .ttlantern--2{ display:none; }
 }
 
 @media (prefers-reduced-motion:reduce){

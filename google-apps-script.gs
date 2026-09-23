@@ -23,6 +23,15 @@
 var SHEET_ID  = '1MWljbWTHPEZLSAUVIDyz7ZmSRZp_to5ofydfMqHkUpw';
 var SHEET_TAB = 'Đơn hàng';
 
+/**
+ * CHỈ ĐÍCH DANH WORKSHEET NHẬN ĐƠN (nên điền):
+ * Mở Google Sheet, bấm vào worksheet muốn nhận đơn, nhìn thanh địa chỉ:
+ *   .../edit#gid=123456789   -> dán số 123456789 vào giữa 2 dấu nháy dưới đây.
+ * Đã điền thì mọi đơn chỉ ghi vào đúng worksheet đó, không bao giờ tạo tab mới.
+ * Để trống '' thì script tự đoán (tab tên "Đơn hàng", hoặc tab nhiều đơn nhất).
+ */
+var SHEET_GID = '';
+
 var HEADER = [
   'Thời gian', 'Mã đơn', 'Họ tên', 'SĐT', 'Email',
   'Hình thức nhận', 'Địa chỉ', 'Chi tiết đơn', 'Số hũ',
@@ -63,10 +72,46 @@ function doGet() {
   return json({ ok: true, message: 'Xa Lo Xo Lam order endpoint dang chay.' });
 }
 
+/**
+ * Tìm đúng 1 tab đơn hàng, KHÔNG dựa hoàn toàn vào tên tab.
+ *
+ * Bản cũ chỉ tìm theo tên 'Đơn hàng'. Tên tiếng Việt có dấu có thể bị lệch
+ * mã hoá (hoặc thừa dấu cách) nên lần nào cũng "không thấy" -> tạo tab mới
+ * cho mỗi đơn. Bản này tìm lần lượt:
+ *   1. tab đã ghi nhớ bằng ID (không đổi kể cả khi bạn đổi tên tab)
+ *   2. tab có tên giống 'Đơn hàng' (bỏ qua dấu cách, hoa/thường, kiểu mã hoá dấu)
+ *   3. tab có dòng tiêu đề bắt đầu bằng 'Thời gian' (lấy tab nhiều dòng nhất)
+ * Chỉ khi cả 3 cách đều không thấy mới tạo tab mới, rồi ghi nhớ ID của nó.
+ */
 function getSheet() {
-  var ss = SpreadsheetApp.openById(SHEET_ID);
-  var sh = ss.getSheetByName(SHEET_TAB);
+  var ss    = SpreadsheetApp.openById(SHEET_ID);
+  var props = PropertiesService.getScriptProperties();
+  var sheets = ss.getSheets();
+  var sh = null;
+
+  // Đã chỉ đích danh worksheet -> chỉ dùng đúng tab đó. Không thấy thì báo lỗi, TUYỆT ĐỐI không tạo tab mới.
+  var gid = String(SHEET_GID).trim();
+  if (gid) {
+    sh = sheets.filter(function (s) { return String(s.getSheetId()) === gid; })[0] || null;
+    if (!sh) throw new Error('Không tìm thấy worksheet có gid=' + gid + '. Kiểm tra lại số SHEET_GID.');
+    if (sh.getLastRow() === 0) sh.appendRow(HEADER);
+    return sh;
+  }
+
+  var savedId = props.getProperty('ORDER_SHEET_ID');
+  if (savedId) {
+    sh = sheets.filter(function (s) { return String(s.getSheetId()) === savedId; })[0] || null;
+  }
+  if (!sh) {
+    sh = sheets.filter(function (s) { return norm(s.getName()) === norm(SHEET_TAB); })[0] || null;
+  }
+  if (!sh) {
+    var withHeader = orderSheets(ss).sort(function (a, b) { return b.getLastRow() - a.getLastRow(); });
+    sh = withHeader[0] || null;
+  }
   if (!sh) sh = ss.insertSheet(SHEET_TAB);
+
+  props.setProperty('ORDER_SHEET_ID', String(sh.getSheetId()));
 
   if (sh.getLastRow() === 0) {
     sh.appendRow(HEADER);
@@ -82,6 +127,77 @@ function getSheet() {
   return sh;
 }
 
+/* chuẩn hoá tên để so sánh: cùng kiểu mã hoá dấu, bỏ dấu cách thừa, không phân biệt hoa/thường */
+function norm(s) {
+  s = String(s || '');
+  if (s.normalize) s = s.normalize('NFC');
+  return s.replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+/* các tab có dòng 1 là tiêu đề đơn hàng (ô A1 = 'Thời gian', ô B1 = 'Mã đơn') */
+function orderSheets(ss) {
+  return ss.getSheets().filter(function (s) {
+    if (s.getLastRow() < 1 || s.getLastColumn() < 2) return false;
+    var h = s.getRange(1, 1, 1, 2).getValues()[0];
+    return norm(h[0]) === norm(HEADER[0]) && norm(h[1]) === norm(HEADER[1]);
+  });
+}
+
+/**
+ * CHẠY 1 LẦN để dọn các tab bị tạo thừa.
+ *
+ * - Chọn 1 tab chính (tab đang được ghi nhớ, không có thì tab nhiều đơn nhất)
+ * - Chép toàn bộ đơn ở các tab thừa sang cuối tab chính
+ * - Xoá các tab thừa đã chép xong
+ *
+ * CHỈ đụng tới những tab có dòng tiêu đề đơn hàng ('Thời gian', 'Mã đơn'...).
+ * Tab nào khác do bạn tự tạo thì không bị động vào.
+ * Kết quả xem ở: Nhật ký thực thi.
+ */
+function gopTabTrungLap() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);                       // không cho đơn mới chen vào lúc đang gộp
+  try {
+    var list = orderSheets(ss);
+    if (list.length <= 1) {
+      Logger.log('Không có tab thừa. Số tab đơn hàng: ' + list.length);
+      return;
+    }
+
+    var props   = PropertiesService.getScriptProperties();
+    var savedId = props.getProperty('ORDER_SHEET_ID');
+    var main = list.filter(function (s) { return String(s.getSheetId()) === savedId; })[0]
+            || list.slice().sort(function (a, b) { return b.getLastRow() - a.getLastRow(); })[0];
+
+    var moved = 0, removed = 0;
+    list.forEach(function (s) {
+      if (s.getSheetId() === main.getSheetId()) return;
+      var rows = s.getLastRow() - 1;
+      if (rows > 0) {
+        var cols = Math.min(s.getLastColumn(), HEADER.length);
+        var values = s.getRange(2, 1, rows, cols).getValues().map(function (r) {
+          if (r[3] !== '' && r[3] !== null) r[3] = "'" + String(r[3]);   // giữ số 0 đầu của SĐT
+          return r;
+        });
+        main.getRange(main.getLastRow() + 1, 1, rows, cols).setValues(values);
+        moved += rows;
+      }
+      Logger.log('Đã gộp ' + Math.max(rows, 0) + ' đơn từ tab "' + s.getName() + '" rồi xoá tab này');
+      ss.deleteSheet(s);
+      removed++;
+    });
+
+    if (main.getLastRow() > 1) {
+      main.getRange(2, 10, main.getLastRow() - 1, 3).setNumberFormat('#,##0"đ"');
+    }
+    props.setProperty('ORDER_SHEET_ID', String(main.getSheetId()));
+    Logger.log('XONG: gộp ' + moved + ' đơn vào tab "' + main.getName() + '", xoá ' + removed + ' tab thừa.');
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function json(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
@@ -95,7 +211,7 @@ function testThuMotDon() {
     orderId: 'XL0101-TST', name: 'Bạn Lơ Test', phone: '0912345678',
     email: 'test@gmail.com', shipMethod: 'Ship nội thành Hà Nội', shipFee: 20000,
     address: 'Số 1 phố Vọng, Hai Bà Trưng, Hà Nội',
-    items: 'Chè bưởi x2, Sữa dâu x1', itemCount: 3,
-    goods: 165000, total: 185000, note: 'Đây là đơn test, xoá đi được nhé'
+    items: 'Chè bưởi (Full size 250ml) x2, Sữa dâu (Mini size 100ml) x1', itemCount: 3,
+    goods: 145000, total: 165000, note: 'Đây là đơn test, xoá đi được nhé'
   }) } });
 }

@@ -35,8 +35,8 @@ Menu, giỏ hàng và đơn gửi Sheet đổi theo:
 
 ```js
 const SIZES = [
-  { id: "full", label: "Full size", volume: "450ml", price: 55000 },
-  { id: "mini", label: "Mini size", volume: "120ml", price: 35000 }
+  { id: "full", label: "Full size", volume: "250ml", price: 55000 },
+  { id: "mini", label: "Mini size", volume: "100ml", price: 35000 }
 ];
 ```
 - `price`: viết liền, không dấu chấm (`55000`, không phải `55.000`)
@@ -47,7 +47,7 @@ const SIZES = [
 Mỗi thẻ sản phẩm có **thanh gạt Full / Mini**: khách bấm chọn size, giá và nút +/− đổi theo size
 đang chọn. Khách vẫn mua lẫn được (vd 2 hũ Full + 1 hũ Mini cùng một vị) — size nào đã có hũ trong
 giỏ thì hiện chấm đỏ ghi số lượng trên thanh gạt. Trong giỏ và trong Google Sheet, mỗi size là một
-dòng riêng, kiểu `Chè bưởi (Full size 450ml) x2, Chè bưởi (Mini size 120ml) x1`.
+dòng riêng, kiểu `Chè bưởi (Full size 250ml) x2, Chè bưởi (Mini size 100ml) x1`.
 
 **Tên, mô tả, còn/hết hàng** — trong khối `PRODUCTS`:
 

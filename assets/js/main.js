@@ -22,6 +22,58 @@ const SIZES = [
   { id: "mini", label: "Mini size", volume: "100ml", price: 35000 }
 ];
 
+/* ============================================================
+   2b. ĐỢT TRUNG THU  —  BẬT / TẮT BẰNG ĐÚNG 1 DÒNG DƯỚI ĐÂY
+   ============================================================
+   true  = web có giao diện Trung thu + 2 hũ Phá cỗ, Rước đèn + combo
+   false = web trở lại y như cũ, giao diện và 3 thẻ Trung thu biến mất
+           (5 vị thường không bị ảnh hưởng gì)
+   Hết đợt chỉ cần đổi thành false, KHÔNG phải xoá gì bên dưới.  */
+const TRUNG_THU = true;
+
+/* Hàng Trung thu có BẢNG GIÁ RIÊNG, không dùng giá của SIZES ở trên.
+   - prices: giá riêng cho từng size (chỉ áp dụng cho hũ này)
+   - sizes : dùng khi món có lựa chọn riêng, vd combo               */
+const SP_TRUNG_THU = [
+  {
+    id: "ruoc-den",
+    name: "Rước đèn",
+    img: "assets/img/sp-ruoc-den.jpg",
+    tag: "VÀNG CAM NEON",
+    slogan: "Bà con ra phố xem múa lân, tôi ngồi một góc chơi slime đỡ buồn.",
+    desc: "Lấy cảm hứng từ chiếc đèn ông sao - biểu tượng quen thuộc của tuổi thơ Việt Nam, slime mang sắc vàng cam neon rực rỡ, trong veo và lấp lánh như ánh đèn dưới đêm trăng. Những hạt kim tuyến và charm hình ngôi sao nhỏ điểm xuyết bên trong tạo cảm giác như cả một bầu trời sao thu bé nằm gọn trong hũ slime.",
+    prices: { full: 65000, mini: 40000 },     // ⚠️ giá riêng đợt Trung thu
+    stock: true
+  },
+  {
+    id: "pha-co",
+    name: "Phá cỗ",
+    img: "assets/img/sp-pha-co.jpg",
+    tag: "BÁNH DẺO THU NHỎ",
+    slogan: "Chú Cuội ngồi gốc cây đa, còn tôi ngồi ở vỉa hè chơi slime.",
+    desc: "Lớp slime tuyết trắng phía dưới tạo cảm giác như lớp vỏ bánh mềm mịn, lớp giữa gợi liên tưởng đến nhân đậu xanh trong khi lớp trên cùng tiếp tục phủ một sắc trắng tinh khôi, hoàn thiện hình ảnh chiếc bánh dẻo thu nhỏ trong lòng bàn tay. Hương vani ngọt dịu lan tỏa, mang đến cảm giác ấm áp và dễ chịu như mùi thơm của những món bánh Trung thu quen thuộc.",
+    prices: { full: 65000, mini: 40000 },     // ⚠️ giá riêng đợt Trung thu
+    stock: true
+  },
+  {
+    id: "combo-trung-thu",
+    name: "Combo Trung thu",
+    img: "assets/img/sp-combo-trung-thu.jpg",
+    tag: "MUA CẶP RẺ HƠN",
+    slogan: "Hai hũ một cặp, chơi trọn đêm rằm.",
+    desc: "Combo 2 hũ Trung thu, rẻ hơn mua lẻ. Cậu tự chọn vị: 2 hũ Rước đèn, 2 hũ Phá cỗ, hay mỗi thứ một hũ đều được.",
+    // có dòng này thì thẻ hiện ghi chú + form đặt hàng nhắc khách ghi rõ vị
+    comboNote: "Nhớ ghi rõ cậu chọn vị nào ở ô <b>“Lời nhắn cho Xà &amp; Lơ”</b> lúc điền thông tin đặt hàng nhé!",
+    // combo có lựa chọn riêng nên khai giá thẳng ở đây
+    sizes: [
+      { id: "2mini", label: "2 hũ Mini",        volume: "2 × 100ml",   price: 69000  },
+      { id: "mix",   label: "1 Mini + 1 Full",  volume: "100 + 250ml", price: 99000  },
+      { id: "2full", label: "2 hũ Full",        volume: "2 × 250ml",   price: 119000 }
+    ],
+    stock: true
+  }
+];
+
 /* ---------- 3. SẢN PHẨM ---------- */
 const PRODUCTS = [
   {
@@ -85,9 +137,26 @@ const money = n => n.toLocaleString("vi-VN") + "đ";
 const cart = new Map();          // "idVị:idSize" -> số lượng, vd "che-buoi:mini" -> 2
 let shipId = null;
 
-const keyOf    = (pid, sid) => pid + ":" + sid;
-const minPrice = Math.min(...SIZES.map(s => s.price));
-const selSize  = new Map(PRODUCTS.map(p => [p.id, SIZES[0].id]));   // size đang chọn trên từng thẻ
+const keyOf = (pid, sid) => pid + ":" + sid;
+
+/* Hàng Trung thu xếp lên đầu, tắt cờ là biến mất hoàn toàn */
+const ALL = TRUNG_THU ? [...SP_TRUNG_THU, ...PRODUCTS] : PRODUCTS;
+const isTT = p => TRUNG_THU && SP_TRUNG_THU.some(x => x.id === p.id);
+
+/* Lựa chọn size của một món: món tự khai `sizes` thì dùng cái đó,
+   không thì dùng bảng SIZES dùng chung. */
+const sizesOf = p => p.sizes || SIZES;
+
+/* Giá một món theo size: ưu tiên giá riêng trong `prices`,
+   rồi tới giá ghi thẳng trong `sizes`, cuối cùng mới là giá chung. */
+function priceOf(p, sid) {
+  if (p.prices && p.prices[sid] != null) return p.prices[sid];
+  const s = sizesOf(p).find(x => x.id === sid);
+  return s ? s.price : 0;
+}
+const fromPrice = p => Math.min(...sizesOf(p).map(s => priceOf(p, s.id)));
+
+const selSize = new Map(ALL.map(p => [p.id, sizesOf(p)[0].id]));   // size đang chọn trên từng thẻ
 
 /* ---------- giỏ hàng KHÔNG được nhớ giữa các lần vào web ----------
    Khách thoát ra vào lại là giỏ trống. Cố tình làm vậy để không ai
@@ -201,18 +270,19 @@ document.addEventListener("click", e => {
 });
 
 /* ---------- BĂNG SẢN PHẨM TREO ---------- */
-$("#strip").innerHTML = PRODUCTS.map(p => `
-  <a class="strip__item" href="#card-${p.id}" data-goto="${p.id}">
+$("#strip").innerHTML = ALL.map(p => `
+  <a class="strip__item${isTT(p) ? " strip__item--tt" : ""}" href="#card-${p.id}" data-goto="${p.id}">
     <img src="${p.img}" alt="Slime ${p.name}" loading="lazy">
     <span>${p.name.toUpperCase()}</span>
   </a>`).join("");
 
 /* ---------- DANH SÁCH MENU ---------- */
-$("#menuList").innerHTML = PRODUCTS.map((p, i) => `
+$("#menuList").innerHTML = ALL.map((p, i) => `
   <li class="menu__row">
     <a class="menu__link" href="#card-${p.id}" data-img="${p.img}" data-goto="${p.id}">
       ${p.name.toUpperCase()} <em>(${String(i + 1).padStart(2, "0")})</em>
-      <b>${p.stock ? "từ " + money(minPrice) : "TẠM HẾT"}</b>
+      ${isTT(p) ? '<i class="menu__tt">🏮 Trung thu</i>' : ""}
+      <b>${p.stock ? "từ " + money(fromPrice(p)) : "TẠM HẾT"}</b>
     </a>
   </li>`).join("");
 
@@ -230,21 +300,25 @@ $("#menuList").addEventListener("mousemove", e => {
 });
 
 /* ---------- LƯỚI SẢN PHẨM ---------- */
-$("#grid").innerHTML = PRODUCTS.map(p => `
-  <article class="card" id="card-${p.id}">
+$("#grid").innerHTML = ALL.map(p => `
+  <article class="card${isTT(p) ? " card--tt" : ""}" id="card-${p.id}">
     <div class="card__pic" data-squish>
       <img src="${p.img}" alt="Slime ${p.name}" loading="lazy">
       <span class="card__squeal">bụp!</span>
+      ${isTT(p) ? '<span class="card__badge">🏮 Trung thu</span>' : ""}
     </div>
     <div class="card__body">
       <h3 class="card__name">${p.name}</h3>
       <p class="card__meta">${p.tag}</p>
+      ${p.slogan ? `<p class="card__slogan">“${p.slogan}”</p>` : ""}
       <p class="card__desc">${p.desc}</p>
+      ${p.comboNote ? `<p class="card__note">📝 ${p.comboNote}</p>` : ""}
       ${p.stock ? `
-      <div class="seg" role="radiogroup" aria-label="Chọn size ${p.name}">
-        ${SIZES.map(s => `
+      <div class="seg${sizesOf(p).length > 2 ? " seg--stack" : ""}" role="radiogroup" aria-label="Chọn size ${p.name}">
+        ${sizesOf(p).map(s => `
         <button class="seg__opt" type="button" role="radio" data-pick="${p.id}" data-sid="${s.id}">
-          ${s.label}<small>${s.volume}</small>
+          <span>${s.label}<small>${s.volume}</small></span>
+          <b class="seg__price">${money(priceOf(p, s.id))}</b>
           <i class="seg__badge" data-badge="${keyOf(p.id, s.id)}" hidden></i>
         </button>`).join("")}
       </div>
@@ -259,6 +333,28 @@ $("#grid").innerHTML = PRODUCTS.map(p => `
       <p class="qty__sub" data-sub="${p.id}"></p>` : `<p class="card__soldout">Tạm hết hàng</p>`}
     </div>
   </article>`).join("");
+
+/* ---------- GIAO DIỆN ĐỢT TRUNG THU ----------
+   Toàn bộ phần này chỉ chạy khi TRUNG_THU = true.
+   Đổi cờ thành false là web về y như cũ, không còn dấu vết gì. */
+if (TRUNG_THU) {
+  document.documentElement.classList.add("tt");
+  const shop = $("#shop");
+  const banner = document.createElement("div");
+  banner.className = "ttbanner";
+  banner.innerHTML = `
+    <div class="ttbanner__sky" aria-hidden="true">
+      <span class="ttbanner__moon"></span>
+      <span class="ttlantern ttlantern--1">🏮</span>
+      <span class="ttlantern ttlantern--2">🏮</span>
+      <span class="ttlantern ttlantern--3">🏮</span>
+    </div>
+    <p class="ttbanner__kicker">CHỈ CÓ TRONG ĐỢT RẰM THÁNG 8</p>
+    <h3 class="ttbanner__title display">Trung thu này<br>bóp gì cho vui?</h3>
+    <p class="ttbanner__sub">Rước đèn &amp; Phá cỗ - 2 vị giới hạn. Mua cặp theo combo rẻ hơn mua lẻ.</p>
+    <a class="btn btn--yellow" href="#card-ruoc-den" data-goto="ruoc-den">XEM 2 VỊ GIỚI HẠN ↓</a>`;
+  shop.insertBefore(banner, shop.firstElementChild);
+}
 
 /* bóp thử */
 $$("[data-squish]").forEach(el => {
@@ -320,12 +416,13 @@ $("#ships").addEventListener("change", e => {
 function lines() {
   return [...cart].map(([key, q]) => {
     const [pid, sid] = key.split(":");
-    const p = PRODUCTS.find(x => x.id === pid);
-    const s = SIZES.find(x => x.id === sid);
+    const p = ALL.find(x => x.id === pid);
+    const s = sizesOf(p).find(x => x.id === sid);
+    const price = priceOf(p, sid);
     return {
       key, name: p.name, img: p.img,
-      sizeLabel: `${s.label} ${s.volume}`,
-      price: s.price, qty: q, sum: s.price * q
+      sizeLabel: `${s.label} · ${s.volume}`,   // vd "1 Mini + 1 Full · 100 + 250ml"
+      price, qty: q, sum: price * q
     };
   });
 }
@@ -336,13 +433,13 @@ function itemCount()  { return [...cart.values()].reduce((t, q) => t + q, 0); }
 
 function render() {
   // lưới
-  PRODUCTS.forEach(p => {
-    const sel = SIZES.find(s => s.id === selSize.get(p.id));
+  ALL.forEach(p => {
+    const sel = sizesOf(p).find(s => s.id === selSize.get(p.id));
     let qtyAll = 0, sumAll = 0;
-    SIZES.forEach(s => {
+    sizesOf(p).forEach(s => {
       const q = cart.get(keyOf(p.id, s.id)) || 0;
       qtyAll += q;
-      sumAll += q * s.price;
+      sumAll += q * priceOf(p, s.id);
       const badge = $(`[data-badge="${keyOf(p.id, s.id)}"]`);
       if (badge) { badge.textContent = q; badge.hidden = q === 0; }
     });
@@ -352,14 +449,23 @@ function render() {
       b.setAttribute("aria-checked", String(on));
     });
     const price = $(`[data-price="${p.id}"]`);
-    if (price) price.textContent = money(sel.price);
+    if (price) price.textContent = money(priceOf(p, sel.id));
     const val = $(`[data-val="${p.id}"]`);
     if (val) val.textContent = cart.get(keyOf(p.id, sel.id)) || 0;
     const sub = $(`[data-sub="${p.id}"]`);
-    if (sub) sub.textContent = qtyAll ? `${qtyAll} hũ = ${money(sumAll)}` : "";
+    if (sub) sub.textContent = qtyAll ? `${qtyAll} ${p.sizes ? "bộ" : "hũ"} = ${money(sumAll)}` : "";
     const card = $(`#card-${p.id}`);
     if (card) card.classList.toggle("is-in", qtyAll > 0);
   });
+
+  // giỏ có combo thì nhắc khách ghi rõ vị ở ô lời nhắn
+  const comboHint = $("#comboHint");
+  if (comboHint) {
+    comboHint.hidden = ![...cart.keys()].some(k => {
+      const p = ALL.find(x => x.id === k.split(":")[0]);
+      return p && p.comboNote;
+    });
+  }
 
   // giỏ hàng
   const ls = lines();
@@ -380,7 +486,7 @@ function render() {
   // nav + dock
   $("#navCartCount").textContent = itemCount();
   $("#navCartTotal").textContent = money(grandTotal());
-  $("#dockCount").textContent    = itemCount() + " hũ";
+  $("#dockCount").textContent    = itemCount() + " món";   // "món" vì có cả combo, không chỉ hũ lẻ
   $("#dockTotal").textContent    = money(grandTotal());
   $("#dock").hidden = itemCount() === 0;
 }
